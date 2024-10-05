@@ -7,7 +7,7 @@ type ProductFormatter struct {
 	Stock int     `json:"stock"`
 }
 
-func FormatUser(product Product) ProductFormatter {
+func FormatProduct(product Product) ProductFormatter {
 	formatter := ProductFormatter{
 		ID:    product.ID,
 		Name:  product.Name,

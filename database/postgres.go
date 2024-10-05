@@ -36,11 +36,14 @@ func ConnectDB() {
 }
 
 func InitialMigration() {
-	err := DB.AutoMigrate(&user.User{}, &transaction.Transaction{})
+	err := DB.AutoMigrate(&user.User{}, &product.Product{}, &transaction.Transaction{})
+
 
 	if err != nil {
 		log.Printf("Error when migrating the database: %v", err)
 	}
+
+	SeedDatabase()
 }
 
 func SeedDatabase() {

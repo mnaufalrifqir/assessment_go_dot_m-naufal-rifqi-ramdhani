@@ -7,20 +7,21 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var Client *redis.Client
+var RDB *redis.Client
 var Ctx = context.Background()
 
 func InitRedis() error {
-	Client = redis.NewClient(&redis.Options{
+	RDB = redis.NewClient(&redis.Options{
 		Addr:     utils.GetConfig("REDIS_HOST") + ":" + utils.GetConfig("REDIS_PORT"),
 		Password: utils.GetConfig("REDIS_PASSWORD"),
 		DB:       0,
 	})
 
-	_, err := Client.Ping(Ctx).Result()
+	_, err := RDB.Ping(Ctx).Result()
 	if err != nil {
 		return err
 	}
-
+	
 	return nil
 }
+

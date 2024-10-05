@@ -68,6 +68,7 @@ func SetupRouter(mode string) *gin.Engine {
 
 	database.ConnectDB()
 	database.InitialMigration()
+	database.InitRedis()
 
 	userRepository := user.NewRepository(database.DB)
 
@@ -83,7 +84,6 @@ func SetupRouter(mode string) *gin.Engine {
 
 	api.POST("/register", userHandler.RegisterUser)
 	api.POST("/login", userHandler.LoginUser)
-	api.POST("/email-checkers", userHandler.CheckEmailAvailability)
 
 	return router
 }
