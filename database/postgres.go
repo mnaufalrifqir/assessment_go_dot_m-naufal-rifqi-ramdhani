@@ -36,7 +36,7 @@ func ConnectDB() {
 }
 
 func InitialMigration() {
-	err := DB.AutoMigrate(&user.User{}, &product.Product{}, &transaction.Transaction{})
+	err := DB.AutoMigrate(&user.User{}, &product.Product{}, &transaction.Transaction{}, &transaction.TransactionDetails{})
 
 
 	if err != nil {

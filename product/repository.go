@@ -111,6 +111,11 @@ func (r *repository) Update(product Product) (Product, error) {
 		return product, err
 	}
 
+	err = r.rdb.Del(r.ctx, "products").Err()
+    if err != nil {
+        fmt.Println("Failed to delete cache:", err)
+    }
+
 	err = r.rdb.Del(r.ctx, "product_"+ fmt.Sprint(product.ID)).Err()
 	if err != nil {
 		fmt.Println("Failed to delete cache:", err)

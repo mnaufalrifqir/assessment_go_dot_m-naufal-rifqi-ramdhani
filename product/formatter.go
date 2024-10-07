@@ -17,3 +17,14 @@ func FormatProduct(product Product) ProductFormatter {
 
 	return formatter
 }
+
+func FormatProducts(products []Product) []ProductFormatter {
+	productsFormatter := []ProductFormatter{}
+
+	for _, product := range products {
+		formatter := FormatProduct(product)
+		productsFormatter = append(productsFormatter, formatter)
+	}
+
+	return productsFormatter
+}

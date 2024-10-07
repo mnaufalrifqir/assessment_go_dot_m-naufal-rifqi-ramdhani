@@ -1,11 +1,11 @@
 package product
 
 type Service interface {
-	CreateProduct(input CreateProductInput) (Product, error)
-	GetProduct(input GetProductDetailInput) (Product, error)
 	GetAllProduct() ([]Product, error)
+	GetProduct(input GetProductDetailInput) (Product, error)
+	CreateProduct(input CreateProductInput) (Product, error)
 	UpdateProduct(inputID GetProductDetailInput, inputData CreateProductInput) (Product, error)
-	DeleteProduct(input GetProductDetailInput) (Product, error)
+	DeleteProduct(input GetProductDetailInput) error
 }
 
 type service struct {
@@ -66,12 +66,12 @@ func (s *service) UpdateProduct(inputID GetProductDetailInput, inputData CreateP
 	return updatedProduct, nil
 }
 
-func (s *service) DeleteProduct(input GetProductDetailInput) (Product, error) {
-	deletedProduct, err := s.repository.DeleteByID(input.ID)
+func (s *service) DeleteProduct(input GetProductDetailInput) error {
+	_, err := s.repository.DeleteByID(input.ID)
 	if err != nil {
-		return deletedProduct, err
+		return err
 	}
 
-	return deletedProduct, nil
+	return nil
 }
 

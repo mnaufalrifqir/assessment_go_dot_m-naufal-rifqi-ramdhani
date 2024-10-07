@@ -3,6 +3,7 @@ package handler
 import (
 	"api-dot/helper"
 	"api-dot/product"
+	"api-dot/user"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,12 +12,19 @@ type productHandler struct {
 	productService product.Service
 }
 
-func NewProductService(productService product.Service) *productHandler {
+func NewProductHandler(productService product.Service) *productHandler {
 	return &productHandler{productService}
 }
 
 func (h *productHandler) CreateProduct(c *gin.Context) {
 	var input product.CreateProductInput
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	if currentUser.Role != "admin" {
+		response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+		c.JSON(http.StatusUnauthorized, response)
+		return
+	}
 
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
@@ -87,6 +95,13 @@ func (h *productHandler) GetAllProduct(c *gin.Context) {
 func (h *productHandler) UpdateProduct(c *gin.Context) {
 	var inputID product.GetProductDetailInput
 
+	currentUser := c.MustGet("currentUser").(user.User)
+	if currentUser.Role != "admin" {
+		response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+		c.JSON(http.StatusUnauthorized, response)
+		return
+	}
+
 	err := c.ShouldBindUri(&inputID)
 	if err != nil {
 		response := helper.APIResponse("Failed to update product", http.StatusBadRequest, "error", nil)
@@ -123,6 +138,13 @@ func (h *productHandler) UpdateProduct(c *gin.Context) {
 func (h *productHandler) DeleteProduct(c *gin.Context) {
 	var input product.GetProductDetailInput
 
+	currentUser := c.MustGet("currentUser").(user.User)
+	if currentUser.Role != "admin" {
+		response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+		c.JSON(http.StatusUnauthorized, response)
+		return
+	}
+
 	err := c.ShouldBindUri(&input)
 	if err != nil {
 		response := helper.APIResponse("Failed to delete product", http.StatusBadRequest, "error", nil)
@@ -130,16 +152,14 @@ func (h *productHandler) DeleteProduct(c *gin.Context) {
 		return
 	}
 
-	deletedProduct, err := h.productService.DeleteProduct(input)
+	err = h.productService.DeleteProduct(input)
 	if err != nil {
 		response := helper.APIResponse("Failed to delete product", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	formatter := product.FormatProduct(deletedProduct)
-
-	response := helper.APIResponse("Product has been deleted", http.StatusOK, "success", formatter)
+	response := helper.APIResponse("Product has been deleted", http.StatusOK, "success", nil)
 
 	c.JSON(http.StatusOK, response)
 }

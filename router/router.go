@@ -5,6 +5,9 @@ import (
 	"api-dot/database"
 	"api-dot/handler"
 	"api-dot/helper"
+	"api-dot/payment"
+	"api-dot/product"
+	"api-dot/transaction"
 	"api-dot/user"
 	"net/http"
 	"strings"
@@ -71,11 +74,18 @@ func SetupRouter(mode string) *gin.Engine {
 	database.InitRedis()
 
 	userRepository := user.NewRepository(database.DB)
+	productRepository := product.NewRepository(database.DB, database.RDB, database.Ctx)
+	transactionRepository := transaction.NewRepository(database.DB, database.RDB, database.Ctx)
 
 	userService := user.NewService(userRepository)
+	productService := product.NewService(productRepository)
+	paymentService := payment.NewService()
+	transactionService := transaction.NewService(transactionRepository, paymentService, productRepository)
 	authService := auth.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
+	productHandler := handler.NewProductHandler(productService)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
 
 	router.Use(cors.Default())
 	router.Use(logger.SetLogger())
@@ -84,6 +94,19 @@ func SetupRouter(mode string) *gin.Engine {
 
 	api.POST("/register", userHandler.RegisterUser)
 	api.POST("/login", userHandler.LoginUser)
+
+	api.GET("/products", productHandler.GetAllProduct)
+	api.GET("/product/:id", productHandler.GetProduct)
+	api.POST("/product", authMiddleware(authService, userService), productHandler.CreateProduct)
+	api.PUT("/product/:id", authMiddleware(authService, userService), productHandler.UpdateProduct)
+	api.DELETE("/product/:id", authMiddleware(authService, userService), productHandler.DeleteProduct)
+
+	api.POST("/transaction", authMiddleware(authService, userService), transactionHandler.CreateTransaction)
+	api.GET("/transactions", authMiddleware(authService, userService), transactionHandler.GetTransactions)
+	api.GET("/transaction/:id", authMiddleware(authService, userService), transactionHandler.GetTransactionByID)
+	api.GET("/transactions/user", authMiddleware(authService, userService), transactionHandler.GetTransactionsUser)
+	api.POST("/transactions/notification", transactionHandler.GetNotification)
+
 
 	return router
 }
